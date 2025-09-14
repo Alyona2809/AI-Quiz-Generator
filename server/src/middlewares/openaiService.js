@@ -8,6 +8,10 @@ const openai = new OpenAI({
 const generateQuizWithOpenAI = async (req, res, next) => {
   try {
     const text = req.extractedText || req.body.text;
+    console.log(
+      "Text received:",
+      text ? `${text.substring(0, 100)}...` : "No text"
+    );
 
     if (!text) {
       return res
@@ -62,6 +66,12 @@ ${text}
     next();
   } catch (error) {
     console.error("Ошибка создания теста с помощью OpenAI:", error);
+    console.error("Error details:", {
+      message: error.message,
+      status: error.status,
+      code: error.code,
+      type: error.type,
+    });
     return res
       .status(500)
       .json(formatResponse(false, "Не удалось создать тест", null));

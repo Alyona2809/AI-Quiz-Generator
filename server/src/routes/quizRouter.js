@@ -5,9 +5,9 @@ const validateQuizInput = require("../middlewares/validateQuizInput");
 const processPdfFile = require("../middlewares/processPdfFile");
 const generateQuizWithOpenAI = require("../middlewares/openaiService");
 
-const router = express.Router();
+const quizRouter = express.Router();
 
-router.post(
+quizRouter.post(
   "/generate-quiz",
   uploadSingleFile,
   validateQuizInput,
@@ -16,4 +16,4 @@ router.post(
   generateQuiz
 );
 
-module.exports = router;
+module.exports = quizRouter;

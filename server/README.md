@@ -1,35 +1,46 @@
-# AI Quiz Generator - Backend
+# AI Quiz Generator - Backend Server
 
-Backend сервер для генерации квизов с помощью OpenAI API.
+Backend сервер для приложения AI Quiz Generator, который генерирует квизы на основе текста или PDF файлов с использованием OpenAI API.
 
-## Установка зависимостей
+## Возможности
+
+- Генерация квизов на основе текста с помощью OpenAI API
+- Обработка PDF файлов и извлечение текста
+- RESTful API с валидацией входных данных
+- CORS поддержка для фронтенда
+- Логирование запросов
+
+## Установка
 
 ```bash
 npm install
 ```
 
-## Настройка окружения
+## Настройка
 
-Создайте файл `.env` в корне папки `server/` со следующим содержимым:
+1. Создайте файл `.env` в корне папки `server`:
 
-```
+```env
 OPENAI_API_KEY=your_openai_api_key_here
 PORT=3001
 ```
 
-## Запуск сервера
+2. Получите API ключ от OpenAI:
+   - Зарегистрируйтесь на [platform.openai.com](https://platform.openai.com)
+   - Создайте новый API ключ
+   - Добавьте его в файл `.env`
 
-### Режим разработки
+## Запуск
 
 ```bash
+# Разработка (с автоперезагрузкой)
 npm run dev
-```
 
-### Продакшн режим
-
-```bash
+# Продакшн
 npm start
 ```
+
+Сервер будет доступен по адресу `http://localhost:3001`
 
 ## API Endpoints
 
@@ -37,33 +48,16 @@ npm start
 
 Генерирует квиз на основе текста или PDF файла.
 
-**Параметры запроса:**
+**Параметры:**
 
 - `text` (string, optional) - текст для генерации квиза
-- `file` (file, optional) - PDF файл для генерации квиза
+- `file` (file, optional) - PDF файл для обработки
 
-**Пример запроса с текстом:**
+**Пример запроса:**
 
-```javascript
-const formData = new FormData();
-formData.append("text", "Ваш текст здесь...");
-
-fetch("/api/quiz/generate-quiz", {
-  method: "POST",
-  body: formData,
-});
-```
-
-**Пример запроса с файлом:**
-
-```javascript
-const formData = new FormData();
-formData.append("file", pdfFile);
-
-fetch("/api/quiz/generate-quiz", {
-  method: "POST",
-  body: formData,
-});
+```bash
+curl -X POST http://localhost:3001/api/quiz/generate-quiz \
+  -F "text=Искусственный интеллект - это область компьютерных наук"
 ```
 
 **Ответ:**
@@ -71,13 +65,18 @@ fetch("/api/quiz/generate-quiz", {
 ```json
 {
   "success": true,
-  "message": "Quiz generated successfully",
+  "message": "Квиз успешно создан",
   "data": {
     "quiz": [
       {
         "id": 1,
-        "question": "Вопрос 1?",
-        "options": ["Вариант 1", "Вариант 2", "Вариант 3"],
+        "question": "Что такое искусственный интеллект?",
+        "options": [
+          "Область компьютерных наук",
+          "Тип программного обеспечения",
+          "Метод шифрования данных",
+          "Способ хранения информации"
+        ],
         "correctAnswer": 0
       }
     ]
@@ -85,38 +84,60 @@ fetch("/api/quiz/generate-quiz", {
 }
 ```
 
-### GET /api/health
-
-Проверка состояния сервера.
-
-**Ответ:**
-
-```json
-{
-  "status": "OK",
-  "message": "AI Quiz Generator API is running"
-}
-```
-
 ## Структура проекта
 
 ```
-server/
-├── src/
-│   ├── controllers/
-│   │   └── quizController.js    # Контроллер для генерации квизов
-│   ├── routes/
-│   │   ├── apiRouter.js         # Основной API роутер
-│   │   └── quizRouter.js        # Роуты для квизов
-│   ├── configs/
-│   │   └── serverConfig.js      # Конфигурация сервера
-│   └── utils/
-│       └── formatResponse.js    # Утилита для форматирования ответов
-├── package.json
-└── .env                         # Переменные окружения (создать вручную)
+src/
+├── app.js              # Главный файл приложения
+├── configs/            # Конфигурация сервера
+│   └── serverConfig.js # Настройки Express и CORS
+├── controllers/        # Контроллеры
+│   └── quizController.js # Обработка запросов квизов
+├── middlewares/        # Middleware функции
+│   ├── fileUpload.js   # Загрузка файлов
+│   ├── validateQuizInput.js # Валидация входных данных
+│   ├── processPdfFile.js # Обработка PDF
+│   ├── openaiService.js # Взаимодействие с OpenAI
+│   └── removeHttpHeader.js # Удаление заголовков
+├── routes/            # Маршруты API
+│   ├── apiRouter.js   # Главный роутер API
+│   ├── quizRouter.js  # Роуты для квизов
+│   └── errorRouter.js # Обработка ошибок
+└── utils/             # Утилиты
+    └── formatResponse.js # Форматирование ответов
 ```
 
-При доступном OpenAI API - будет генерировать реальные квизы
-При недоступном OpenAI API - вернет ошибку 500 с понятным сообщением
-Все middleware работают правильно в цепочке
-Обработка ошибок функционирует корректно
+## Технологии
+
+- **Node.js** - серверная платформа
+- **Express.js** - веб-фреймворк
+- **OpenAI API** - генерация квизов с помощью ИИ
+- **Multer** - обработка загрузки файлов
+- **pdf-parse** - извлечение текста из PDF
+- **CORS** - поддержка кросс-доменных запросов
+- **Morgan** - логирование HTTP запросов
+- **dotenv** - управление переменными окружения
+
+## Обработка ошибок
+
+Сервер обрабатывает различные типы ошибок:
+
+- **400** - Неверные входные данные
+- **500** - Внутренние ошибки сервера
+- **Ошибки OpenAI API** - проблемы с генерацией квизов
+- **Ошибки обработки PDF** - проблемы с извлечением текста
+
+## Безопасность
+
+- API ключ OpenAI хранится в переменных окружения
+- Валидация всех входных данных
+- Ограничение типов загружаемых файлов (только PDF)
+- CORS настройки для безопасности
+
+## Разработка
+
+Для разработки рекомендуется использовать `npm run dev` с nodemon для автоперезагрузки при изменениях.
+
+## Лицензия
+
+ISC
